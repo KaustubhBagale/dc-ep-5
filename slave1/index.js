@@ -22,6 +22,7 @@ app.post('/adjust_time', (req, res) => {
 });
 
 // Endpoint for Cristian's Algorithm (Client side)
+// Improved Cristian's Algorithm sync on Slave
 app.get('/sync_with_master', async (req, res) => {
     const T1 = Date.now();
     const response = await axios.get(`${MASTER_URL}/get_time`);
@@ -30,10 +31,17 @@ app.get('/sync_with_master', async (req, res) => {
 
     const RTT = T2 - T1;
     const adjustedTime = serverTime + RTT / 2;
+    const oldTime = getLocalTime();
 
     setLocalTime(adjustedTime);
 
-    res.send(`Synchronized using Cristian's algorithm. New time: ${new Date(adjustedTime)}`);
+    res.json({
+        method: "Cristian's Algorithm",
+        oldLocalTime: new Date(oldTime).toString(),
+        serverTime: new Date(serverTime).toString(),
+        RTT: `${RTT} ms`,
+        newLocalTime: new Date(adjustedTime).toString()
+    });
 });
 
 app.listen(PORT, () => {
